@@ -1,0 +1,199 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  aws-serverless-ecommerce-dietstore
+
+  Sample SAM Template for aws-serverless-ecommerce-dietstore
+  
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Timeout: 3
+
+Resources:
+
+  AddProduct:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      FunctionName: AddProduct
+      CodeUri: diet-store/
+      Handler: AddProduct.handler
+      Runtime: nodejs12.x
+      Policies:
+        - AmazonDynamoDBFullAccess 
+        #- DynamoDBCrudPolicy:
+        #    TableName: !Ref NotificationTable 
+      Events:
+        HelloWorld:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /product
+            Method: POST
+            # RestApiId: !Ref WriteNotificaitonApi
+            # RequestModel: 
+            #  Model: RequestClass # REQUIRED; must match the name of a model defined in the Models property of the AWS::Serverless::API
+            #  Required: true # OPTIONAL; boolean
+
+  ListProducts:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      FunctionName: ListProducts
+      CodeUri: diet-store/
+      Handler: ListProducts.handler
+      Runtime: nodejs12.x
+      Policies:
+        - AmazonDynamoDBFullAccess 
+        #- DynamoDBCrudPolicy:
+        #    TableName: !Ref NotificationTable 
+      Events:
+        HelloWorld:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /product
+            Method: GET
+            # RestApiId: !Ref WriteNotificaitonApi
+            # RequestModel: 
+            #  Model: RequestClass # REQUIRED; must match the name of a model defined in the Models property of the AWS::Serverless::API
+            #  Required: true # OPTIONAL; boolean
+
+  AddToCart:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      FunctionName: AddToCart
+      CodeUri: diet-store/
+      Handler: AddToCart.handler
+      Runtime: nodejs12.x
+      Policies:
+        - AmazonDynamoDBFullAccess 
+        #- DynamoDBCrudPolicy:
+        #    TableName: !Ref NotificationTable 
+      Events:
+        HelloWorld:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /shoppingcart
+            Method: POST
+            # RestApiId: !Ref WriteNotificaitonApi
+            # RequestModel: 
+            #  Model: RequestClass # REQUIRED; must match the name of a model defined in the Models property of the AWS::Serverless::API
+            #  Required: true # OPTIONAL; boolean   
+
+  RemoveFromCart:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      FunctionName: RemoveFromCart
+      CodeUri: diet-store/
+      Handler: RemoveFromCart.handler
+      Runtime: nodejs12.x
+      Policies:
+        - AmazonDynamoDBFullAccess 
+        #- DynamoDBCrudPolicy:
+        #    TableName: !Ref NotificationTable 
+      Events:
+        HelloWorld:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /shoppingcart
+            Method: DELETE
+            # RestApiId: !Ref WriteNotificaitonApi
+            # RequestModel: 
+            #  Model: RequestClass # REQUIRED; must match the name of a model defined in the Models property of the AWS::Serverless::API
+            #  Required: true # OPTIONAL; boolean   
+
+  ProceedCheckout:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      FunctionName: ProceedCheckout
+      CodeUri: diet-store/
+      Handler: ProceedCheckout.handler
+      Runtime: nodejs12.x
+      Policies:
+        - AmazonDynamoDBFullAccess 
+        #- DynamoDBCrudPolicy:
+        #    TableName: !Ref NotificationTable 
+      Events:
+        HelloWorld:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /checkout
+            Method: POST
+            # RestApiId: !Ref WriteNotificaitonApi
+            # RequestModel: 
+            #  Model: RequestClass # REQUIRED; must match the name of a model defined in the Models property of the AWS::Serverless::API
+            #  Required: true # OPTIONAL; boolean            
+
+  HelloWorldFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: diet-store/
+      Handler: app.lambdaHandler
+      Runtime: nodejs12.x
+      Events:
+        HelloWorld:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /hello
+            Method: get
+
+  Product:
+    Type: AWS::DynamoDB::Table
+    Properties: 
+      TableName: Product
+      AttributeDefinitions: 
+        - AttributeName: ProductID
+          AttributeType: S
+      KeySchema: 
+        - AttributeName: ProductID
+          KeyType: HASH
+      ProvisionedThroughput: 
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+      StreamSpecification:
+        StreamViewType: NEW_IMAGE  
+
+  ShoppingCart:
+    Type: AWS::DynamoDB::Table
+    Properties: 
+      TableName: ShoppingCart
+      AttributeDefinitions: 
+        - AttributeName: ShoppingCartID
+          AttributeType: S
+      KeySchema: 
+        - AttributeName: ShoppingCartID
+          KeyType: HASH
+      ProvisionedThroughput: 
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+      StreamSpecification:
+        StreamViewType: NEW_IMAGE  
+
+  OrderTable:
+    Type: AWS::DynamoDB::Table
+    Properties: 
+      TableName: Order
+      AttributeDefinitions: 
+        - AttributeName: OrderID
+          AttributeType: S
+      KeySchema: 
+        - AttributeName: OrderID
+          KeyType: HASH
+      ProvisionedThroughput: 
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+      StreamSpecification:
+        StreamViewType: NEW_IMAGE  
+
+
+Outputs:
+  # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
+  # Find out more about other implicit resources you can reference within SAM
+  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
+  HelloWorldApi:
+    Description: "API Gateway endpoint URL for Prod stage for Hello World function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/"
+  HelloWorldFunction:
+    Description: "Hello World Lambda Function ARN"
+    Value: !GetAtt HelloWorldFunction.Arn
+  HelloWorldFunctionIamRole:
+    Description: "Implicit IAM Role created for Hello World function"
+    Value: !GetAtt HelloWorldFunctionRole.Arn
